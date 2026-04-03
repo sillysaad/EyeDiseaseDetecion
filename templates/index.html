@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Disease Classifier</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #999;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Drag & Drop */
+        .dropzone {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .dropzone:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+
+        .dropzone.dragover {
+            background: #e8ebff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .dropzone-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .dropzone-text {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .dropzone-hint {
+            color: #999;
+            font-size: 13px;
+        }
+
+        /* File Browser */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #fileInput, #fileInputBrowser {
+            display: none;
+        }
+
+        .file-input-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-input-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        /* File Path Input */
+        .path-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        #pathInput {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .path-btn {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .path-btn:hover {
+            background: #764ba2;
+        }
+
+        /* Preview & Result */
+        .preview-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .image-preview.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result-label {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .disease-name {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .confidence {
+            font-size: 20px;
+            color: #764ba2;
+            margin-bottom: 20px;
+        }
+
+        .all-predictions {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .prediction-item:last-child {
+            border-bottom: none;
+        }
+
+        .prediction-name {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .prediction-confidence {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .filename {
+            color: #999;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👁️ Eye Disease Classifier</h1>
+        <p class="subtitle">Upload an eye image to detect disease</p>
+
+        <div class="input-section">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(0)">Drag & Drop</button>
+                <button class="tab-btn" onclick="switchTab(1)">Browse File</button>
+                <button class="tab-btn" onclick="switchTab(2)">File Path</button>
+            </div>
+
+            <!-- Tab 1: Drag & Drop -->
+            <div class="tab-content active">
+                <div class="dropzone" id="dropzone">
+                    <div class="dropzone-icon">📁</div>
+                    <div class="dropzone-text">Drag & drop your image here</div>
+                    <div class="dropzone-hint">or click to browse</div>
+                </div>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
+
+            <!-- Tab 2: Browser -->
+            <div class="tab-content">
+                <div class="file-input-wrapper">
+                    <button class="file-input-btn" onclick="document.getElementById('fileInputBrowser').click()">
+                        📂 Choose Image
+                    </button>
+                    <input type="file" id="fileInputBrowser" accept="image/*">
+                    <div class="filename" id="selectedFilename"></div>
+                </div>
+            </div>
+
+            <!-- Tab 3: File Path -->
+            <div class="tab-content">
+                <div class="path-input-group">
+                    <input type="text" id="pathInput" placeholder="Enter full image path...">
+                    <button class="path-btn" onclick="predictFromPath()">Analyze</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error" id="error"></div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #667eea;">Analyzing image...</p>
+        </div>
+
+        <!-- Preview & Results -->
+        <div class="preview-section">
+            <img class="image-preview" id="preview">
+            
+            <div class="result" id="result">
+                <div class="result-label">Prediction Result</div>
+                <div class="disease-name" id="diseaseName">-</div>
+                <div class="confidence" id="confidence">-</div>
+                
+                <div class="all-predictions">
+                    <div style="color: #999; font-size: 12px; margin-bottom: 10px;">Top Predictions:</div>
+                    <div id="allPredictions"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInputBrowser = document.getElementById('fileInputBrowser');
+        const preview = document.getElementById('preview');
+        const result = document.getElementById('result');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+
+        // Tab switching
+        function switchTab(index) {
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.tab-content').forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+        }
+
+        // Drag & Drop
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+        fileInputBrowser.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+            document.getElementById('selectedFilename').textContent = e.target.files[0]?.name || '';
+        });
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            if (!file.type.startsWith('image/')) {
+                showError('Please select a valid image file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.classList.add('show');
+                predictFromFile(file);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function predictFromFile(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            predict(formData);
+        }
+
+        function predictFromPath() {
+            const path = document.getElementById('pathInput').value.trim();
+            if (!path) {
+                showError('Please enter a file path');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image_path', path);
+            predict(formData);
+        }
+
+        function predict(formData) {
+            error.classList.remove('show');
+            loading.style.display = 'block';
+            result.classList.remove('show');
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    displayResult(data);
+                }
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                showError('Error: ' + err.message);
+            });
+        }
+
+        function displayResult(data) {
+            document.getElementById('diseaseName').textContent = data.disease;
+            document.getElementById('confidence').textContent = data.confidence + '%';
+
+            const allPreds = document.getElementById('allPredictions');
+            allPreds.innerHTML = data.all_predictions.map(pred => `
+                <div class="prediction-item">
+                    <span class="prediction-name">${pred.disease}</span>
+                    <span class="prediction-confidence">${pred.confidence.toFixed(1)}%</span>
+                </div>
+            `).join('');
+
+            result.classList.add('show');
+        }
+
+        function showError(msg) {
+            error.textContent = msg;
+            error.classList.add('show');
+            loading.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
