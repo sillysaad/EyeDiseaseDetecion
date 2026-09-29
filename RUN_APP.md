@@ -1,85 +1,23 @@
-# 🚀 Eye Disease Classifier App - Quick Start
+# Run the app
 
-## ✅ What's Created
+## Requirements
 
-- **`app.py`** - Flask web server (backend)
-- **`templates/index.html`** - Beautiful web interface
-- **`eye_disease_model.pkl`** - Your trained model (auto-saved from notebook)
+- Python installed
+- `eye_disease_model.pkl` in the project root
 
----
+## Install and start
 
-## 📝 How to Run
+From the project directory, run:
 
-### Step 1: Install Flask (if not already installed)
-```bash
-pip install flask
-```
-
-### Step 2: Start the app
-```bash
+```powershell
+python -m pip install -r requirements.txt
 python app.py
 ```
 
-You'll see:
-```
-Starting Eye Disease Classifier Web App...
-Open http://localhost:5000 in your browser
-```
+Open <https://localhost:5000>. The app uses a temporary development certificate; accept the browser warning for local testing. Stop the server with `Ctrl+C`.
 
-### Step 3: Open in Browser
-- Go to **http://localhost:5000** in your web browser
-- Done! 🎉
+## Use
 
----
+Choose an image by dragging it into the drop area, browsing for a file, or capturing it with the camera. The app displays the predicted class, confidence, and top three predictions.
 
-## 📖 How to Use
-
-The web app has **3 input methods**:
-
-### 🖱️ **Drag & Drop**
-- Drag an eye image onto the box
-- Results appear in seconds
-
-### 📂 **Browse File**
-- Click "Choose Image" button
-- Select from your computer
-
-### 📍 **File Path**
-- Paste full image path
-- Click "Analyze"
-
----
-
-## 📊 Output
-
-Shows:
-- ✅ **Predicted Disease** (large text)
-- ✅ **Confidence %** (e.g., 98.5%)
-- ✅ **Top 3 Predictions** (all diseases ranked)
-
----
-
-## 🛑 Troubleshooting
-
-**"Model not loaded"?**
-- Make sure you ran the model export cell in `model.ipynb`
-- Check that `eye_disease_model.pkl` exists in the folder
-
-**Port 5000 already in use?**
-- Edit `app.py` last line: change `port=5000` to `port=8000`
-
-**Want to stop the app?**
-- Press `Ctrl + C` in terminal
-
----
-
-## 📦 Supported Image Formats
-- JPG / JPEG
-- PNG
-- GIF
-- WebP
-
----
-
-## 🎯 That's It!
-Your eye disease classifier is now live as a web app! 🎉
+The Flask development server is for local testing, not production deployment. Only load model pickle files you trust.
