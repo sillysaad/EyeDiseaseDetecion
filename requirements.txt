@@ -6,5 +6,6 @@ pillow
 fastcore
 fastai
 flask
+gunicorn
 torch
 torchvision
