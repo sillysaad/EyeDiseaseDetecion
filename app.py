@@ -1,21 +1,16 @@
+from pathlib import Path
+
 from flask import Flask, request, render_template, jsonify
 from PIL import Image
-import io
-import torch
 from fastai.vision.all import load_learner
-import os
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-app.config['UPLOAD_FOLDER'] = 'uploads'
-
-# Create uploads folder if it doesn't exist
-os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Load the trained model
 try:
-    learn = load_learner('eye_disease_model.pkl')
+    model_path = Path(__file__).resolve().parent / 'eye_disease_model.pkl'
+    learn = load_learner(model_path)
     model_loaded = True
 except Exception as e:
     print(f"Error loading model: {e}")
@@ -30,25 +25,14 @@ def predict():
     if not model_loaded:
         return jsonify({'error': 'Model not loaded'}), 500
     
-    # Check if image is in request
-    if 'image' not in request.files and 'image_path' not in request.form:
+    file = request.files.get('image')
+    if file is None:
         return jsonify({'error': 'No image provided'}), 400
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
     
     try:
-        # Handle file upload
-        if 'image' in request.files:
-            file = request.files['image']
-            if file.filename == '':
-                return jsonify({'error': 'No file selected'}), 400
-            
-            img = Image.open(file).convert('RGB')
-        
-        # Handle file path input
-        elif 'image_path' in request.form:
-            image_path = request.form['image_path']
-            if not os.path.exists(image_path):
-                return jsonify({'error': 'File not found'}), 400
-            img = Image.open(image_path).convert('RGB')
+        img = Image.open(file).convert('RGB')
         
         # Make prediction
         pred, pred_idx, probs = learn.predict(img)

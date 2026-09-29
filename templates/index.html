@@ -149,35 +149,6 @@
             box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
 
-        /* File Path Input */
-        .path-input-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        #pathInput {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        .path-btn {
-            padding: 12px 20px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-
-        .path-btn:hover {
-            background: #764ba2;
-        }
-
         /* Camera */
         .cam-wrap {
             text-align: center;
@@ -382,8 +353,7 @@
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab(0)">Drag & Drop</button>
                 <button class="tab-btn" onclick="switchTab(1)">Browse File</button>
-                <button class="tab-btn" onclick="switchTab(2)">File Path</button>
-                <button class="tab-btn" onclick="switchTab(3)">📷 Camera</button>
+                <button class="tab-btn" onclick="switchTab(2)">📷 Camera</button>
             </div>
 
             <!-- Tab 1: Drag & Drop -->
@@ -407,15 +377,7 @@
                 </div>
             </div>
 
-            <!-- Tab 3: File Path -->
-            <div class="tab-content">
-                <div class="path-input-group">
-                    <input type="text" id="pathInput" placeholder="Enter full image path...">
-                    <button class="path-btn" onclick="predictFromPath()">Analyze</button>
-                </div>
-            </div>
-
-            <!-- Tab 4: Camera -->
+            <!-- Tab 3: Camera -->
             <div class="tab-content">
                 <div class="cam-wrap">
                     <div class="cam-stage" id="camStage">
@@ -471,7 +433,7 @@
 
         // Tab switching
         function switchTab(index) {
-            if (index !== 3) stopCamera();
+            if (index !== 2) stopCamera();
             document.querySelectorAll('.tab-btn').forEach((btn, i) => {
                 btn.classList.toggle('active', i === index);
             });
@@ -525,18 +487,6 @@
         function predictFromFile(file) {
             const formData = new FormData();
             formData.append('image', file);
-            predict(formData);
-        }
-
-        function predictFromPath() {
-            const path = document.getElementById('pathInput').value.trim();
-            if (!path) {
-                showError('Please enter a file path');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('image_path', path);
             predict(formData);
         }
 
