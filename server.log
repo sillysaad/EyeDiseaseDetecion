@@ -1,0 +1,31 @@
+C:\Users\SAAD\Downloads\EyeDiseaseDetecion-main\EyeDiseaseDetecion-main\venv\lib\site-packages\torch\jit\_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+C:\Users\SAAD\Downloads\EyeDiseaseDetecion-main\EyeDiseaseDetecion-main\venv\lib\site-packages\fastai\learner.py:456: UserWarning: load_learner` uses Python's insecure pickle module, which can execute malicious arbitrary code when loading. Only load files you trust.
+If you only need to load model weights and optimizer state, use the safe `Learner.load` instead.
+  warn("load_learner` uses Python's insecure pickle module, which can execute malicious arbitrary code when loading. Only load files you trust.\nIf you only need to load model weights and optimizer state, use the safe `Learner.load` instead.")
+Starting Eye Disease Classifier Web App...
+Open https://localhost:5000 in your browser
+On your phone (same Wi-Fi): https://<your-PC-IP>:5000
+ * Serving Flask app 'app'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on https://127.0.0.1:5000
+ * Running on https://192.168.0.102:5000
+Press CTRL+C to quit
+ * Restarting with stat
+C:\Users\SAAD\Downloads\EyeDiseaseDetecion-main\EyeDiseaseDetecion-main\venv\lib\site-packages\torch\jit\_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+C:\Users\SAAD\Downloads\EyeDiseaseDetecion-main\EyeDiseaseDetecion-main\venv\lib\site-packages\fastai\learner.py:456: UserWarning: load_learner` uses Python's insecure pickle module, which can execute malicious arbitrary code when loading. Only load files you trust.
+If you only need to load model weights and optimizer state, use the safe `Learner.load` instead.
+  warn("load_learner` uses Python's insecure pickle module, which can execute malicious arbitrary code when loading. Only load files you trust.\nIf you only need to load model weights and optimizer state, use the safe `Learner.load` instead.")
+ * Debugger is active!
+ * Debugger PIN: 108-796-869
+127.0.0.1 - - [29/Sep/2026 22:44:02] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [29/Sep/2026 23:02:42] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [29/Sep/2026 23:02:42] "GET /favicon.ico HTTP/1.1" 404 -
+Starting Eye Disease Classifier Web App...
+Open https://localhost:5000 in your browser
+On your phone (same Wi-Fi): https://<your-PC-IP>:5000
+ |----------------------------------------| 0.00% [0/1 00:00<?] |XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX| 100.00% [1/1 00:00<00:00]                                                                                                                                          127.0.0.1 - - [29/Sep/2026 23:02:54] "POST /predict HTTP/1.1" 200 -
+127.0.0.1 - - [29/Sep/2026 23:03:18] "GET / HTTP/1.1" 200 -

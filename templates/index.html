@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Disease Classifier</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 14px;
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: #999;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Drag & Drop */
+        .dropzone {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9ff;
+        }
+
+        .dropzone:hover {
+            background: #f0f2ff;
+            border-color: #764ba2;
+        }
+
+        .dropzone.dragover {
+            background: #e8ebff;
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .dropzone-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .dropzone-text {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .dropzone-hint {
+            color: #999;
+            font-size: 13px;
+        }
+
+        /* File Browser */
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #fileInput, #fileInputBrowser {
+            display: none;
+        }
+
+        .file-input-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-input-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        /* File Path Input */
+        .path-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        #pathInput {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .path-btn {
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .path-btn:hover {
+            background: #764ba2;
+        }
+
+        /* Camera */
+        .cam-wrap {
+            text-align: center;
+        }
+
+        .cam-stage {
+            position: relative;
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #111;
+        }
+
+        #video {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #overlay {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .cam-stage.mirror #video,
+        .cam-stage.mirror #overlay {
+            transform: scaleX(-1);
+        }
+
+        .cam-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .cam-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cam-btn.primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .cam-btn.primary:hover {
+            background: #764ba2;
+        }
+
+        .cam-btn.secondary {
+            background: #f0f2ff;
+            color: #667eea;
+        }
+
+        .cam-btn.secondary:hover {
+            background: #e8ebff;
+        }
+
+        .cam-hints {
+            display: none;
+            margin-top: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .cam-hints.show { display: block; }
+        .cam-hints.ok { background: #e6f9ee; color: #1a7f4b; }
+        .cam-hints.warn { background: #fff4e0; color: #a05c00; }
+        .cam-hints.bad { background: #fee; color: #c33; }
+
+        /* Preview & Result */
+        .preview-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .image-preview.show {
+            display: block;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 20px;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result-label {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .disease-name {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .confidence {
+            font-size: 20px;
+            color: #764ba2;
+            margin-bottom: 20px;
+        }
+
+        .all-predictions {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .prediction-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .prediction-item:last-child {
+            border-bottom: none;
+        }
+
+        .prediction-name {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .prediction-confidence {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .filename {
+            color: #999;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👁️ Eye Disease Classifier</h1>
+        <p class="subtitle">Upload an eye image to detect disease</p>
+
+        <div class="input-section">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab(0)">Drag & Drop</button>
+                <button class="tab-btn" onclick="switchTab(1)">Browse File</button>
+                <button class="tab-btn" onclick="switchTab(2)">File Path</button>
+                <button class="tab-btn" onclick="switchTab(3)">📷 Camera</button>
+            </div>
+
+            <!-- Tab 1: Drag & Drop -->
+            <div class="tab-content active">
+                <div class="dropzone" id="dropzone">
+                    <div class="dropzone-icon">📁</div>
+                    <div class="dropzone-text">Drag & drop your image here</div>
+                    <div class="dropzone-hint">or click to browse</div>
+                </div>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
+
+            <!-- Tab 2: Browser -->
+            <div class="tab-content">
+                <div class="file-input-wrapper">
+                    <button class="file-input-btn" onclick="document.getElementById('fileInputBrowser').click()">
+                        📂 Choose Image
+                    </button>
+                    <input type="file" id="fileInputBrowser" accept="image/*">
+                    <div class="filename" id="selectedFilename"></div>
+                </div>
+            </div>
+
+            <!-- Tab 3: File Path -->
+            <div class="tab-content">
+                <div class="path-input-group">
+                    <input type="text" id="pathInput" placeholder="Enter full image path...">
+                    <button class="path-btn" onclick="predictFromPath()">Analyze</button>
+                </div>
+            </div>
+
+            <!-- Tab 4: Camera -->
+            <div class="tab-content">
+                <div class="cam-wrap">
+                    <div class="cam-stage" id="camStage">
+                        <video id="video" autoplay playsinline muted></video>
+                        <canvas id="overlay"></canvas>
+                    </div>
+                    <canvas id="cameraCanvas" style="display:none"></canvas>
+                    <div class="cam-btns">
+                        <button class="cam-btn primary" onclick="startCamera()">🎥 Start Camera</button>
+                        <button class="cam-btn secondary" onclick="switchFacing()">🔄 Front / Back</button>
+                        <button class="cam-btn primary" onclick="capturePhoto()">📸 Capture & Analyze</button>
+                    </div>
+                    <div class="cam-hints" id="camHints"></div>
+                    <canvas id="hintCanvas" width="64" height="48" style="display:none"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error" id="error"></div>
+
+        <!-- Loading -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #667eea;">Analyzing image...</p>
+        </div>
+
+        <!-- Preview & Results -->
+        <div class="preview-section">
+            <img class="image-preview" id="preview">
+            
+            <div class="result" id="result">
+                <div class="result-label">Prediction Result</div>
+                <div class="disease-name" id="diseaseName">-</div>
+                <div class="confidence" id="confidence">-</div>
+                
+                <div class="all-predictions">
+                    <div style="color: #999; font-size: 12px; margin-bottom: 10px;">Top Predictions:</div>
+                    <div id="allPredictions"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const fileInputBrowser = document.getElementById('fileInputBrowser');
+        const preview = document.getElementById('preview');
+        const result = document.getElementById('result');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+
+        // Tab switching
+        function switchTab(index) {
+            if (index !== 3) stopCamera();
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.tab-content').forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+        }
+
+        // Drag & Drop
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+        fileInputBrowser.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+            document.getElementById('selectedFilename').textContent = e.target.files[0]?.name || '';
+        });
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            const file = files[0];
+            if (!file.type.startsWith('image/')) {
+                showError('Please select a valid image file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.classList.add('show');
+                predictFromFile(file);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function predictFromFile(file) {
+            const formData = new FormData();
+            formData.append('image', file);
+            predict(formData);
+        }
+
+        function predictFromPath() {
+            const path = document.getElementById('pathInput').value.trim();
+            if (!path) {
+                showError('Please enter a file path');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image_path', path);
+            predict(formData);
+        }
+
+        function predict(formData) {
+            error.classList.remove('show');
+            loading.style.display = 'block';
+            result.classList.remove('show');
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    displayResult(data);
+                }
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                showError('Error: ' + err.message);
+            });
+        }
+
+        function displayResult(data) {
+            document.getElementById('diseaseName').textContent = data.disease;
+            document.getElementById('confidence').textContent = data.confidence + '%';
+
+            const allPreds = document.getElementById('allPredictions');
+            allPreds.innerHTML = data.all_predictions.map(pred => `
+                <div class="prediction-item">
+                    <span class="prediction-name">${pred.disease}</span>
+                    <span class="prediction-confidence">${pred.confidence.toFixed(1)}%</span>
+                </div>
+            `).join('');
+
+            result.classList.add('show');
+        }
+
+        function showError(msg) {
+            error.textContent = msg;
+            error.classList.add('show');
+            loading.style.display = 'none';
+        }
+
+        // ---------- Camera ----------
+        const video = document.getElementById('video');
+        const cameraCanvas = document.getElementById('cameraCanvas');
+        let cameraStream = null;
+        let facing = 'environment'; // 'user' = front camera
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(t => t.stop());
+                cameraStream = null;
+            }
+            video.srcObject = null;
+            stopHints();
+        }
+
+        // ---------- Quality hints + eye detection ----------
+        const hintBar = document.getElementById('camHints');
+        const hintCanvas = document.getElementById('hintCanvas');
+        const overlay = document.getElementById('overlay');
+        let hintTimer = null;
+        let prevFrame = null;
+        let faceDetector = null;
+        let detectorLoading = false;
+        let lastEyeBox = null;
+
+        function hintState(text, cls) {
+            hintBar.textContent = text;
+            hintBar.className = 'cam-hints show ' + cls;
+        }
+
+        async function initDetector() {
+            if (faceDetector || detectorLoading) return;
+            detectorLoading = true;
+            hintState('⏳ Loading eye detector…', 'warn');
+            const CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+            try {
+                const vision = await import(CDN);
+                const fileset = await vision.FilesetResolver.forVisionTasks(CDN + '/wasm');
+                const opts = (delegate) => ({
+                    baseOptions: {
+                        modelAssetPath: 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite',
+                        delegate
+                    },
+                    runningMode: 'VIDEO'
+                });
+                try {
+                    faceDetector = await vision.FaceDetector.createFromOptions(fileset, opts('GPU'));
+                } catch (e) {
+                    faceDetector = await vision.FaceDetector.createFromOptions(fileset, opts('CPU'));
+                }
+            } catch (e) {
+                faceDetector = null; // fall back to basic hints
+            }
+            detectorLoading = false;
+        }
+
+        // Eye band box (pixels) from a BlazeFace detection
+        function eyeBandBox(det) {
+            const vw = video.videoWidth, vh = video.videoHeight;
+            const pts = (det.keypoints || []).slice(0, 2)
+                .map(p => ({ x: p.x * vw, y: p.y * vh }));
+            const bb = det.boundingBox;
+            if (pts.length === 2) {
+                const xs = [pts[0].x, pts[1].x].sort((a, b) => a - b);
+                const ey = (pts[0].y + pts[1].y) / 2;
+                const d = Math.max(xs[1] - xs[0], bb.width * 0.15);
+                return { x: xs[0] - 0.8 * d, y: ey - 0.9 * d,
+                         w: (xs[1] - xs[0]) + 1.6 * d, h: 1.8 * d };
+            }
+            return { x: bb.originX + bb.width * 0.15, y: bb.originY + bb.height * 0.2,
+                     w: bb.width * 0.7, h: bb.height * 0.25 };
+        }
+
+        function drawOverlay(det) {
+            overlay.width = video.videoWidth;
+            overlay.height = video.videoHeight;
+            const ctx = overlay.getContext('2d');
+            ctx.clearRect(0, 0, overlay.width, overlay.height);
+            if (!det) return;
+            const bb = det.boundingBox;
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = 'rgba(102,126,234,0.9)';
+            ctx.strokeRect(bb.originX, bb.originY, bb.width, bb.height);
+            const eb = eyeBandBox(det);
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#00e5ff';
+            ctx.strokeRect(eb.x, eb.y, eb.w, eb.h);
+        }
+
+        function frameStats() {
+            const ctx = hintCanvas.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(video, 0, 0, hintCanvas.width, hintCanvas.height);
+            const { data } = ctx.getImageData(0, 0, hintCanvas.width, hintCanvas.height);
+            const w = hintCanvas.width, h = hintCanvas.height;
+            const gray = new Float32Array(w * h);
+            let sum = 0;
+            for (let i = 0, j = 0; i < data.length; i += 4, j++) {
+                const g = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+                gray[j] = g;
+                sum += g;
+            }
+            const mean = sum / gray.length;
+            let motion = 0;
+            if (prevFrame) {
+                for (let k = 0; k < gray.length; k++) motion += Math.abs(gray[k] - prevFrame[k]);
+                motion /= gray.length;
+            }
+            prevFrame = gray.slice();
+            return { mean, motion };
+        }
+
+        function computeHints() {
+            if (!cameraStream || video.readyState < 2) return;
+            const { mean, motion } = frameStats();
+
+            if (faceDetector) {
+                let det = null;
+                try {
+                    const res = faceDetector.detectForVideo(video, performance.now());
+                    det = (res.detections && res.detections[0]) || null;
+                } catch (e) { det = null; }
+                drawOverlay(det);
+                lastEyeBox = det ? eyeBandBox(det) : null;
+
+                if (!det) return hintState('👤 No face detected — center your face', 'warn');
+                if (mean < 60) return hintState('⚠️ Too dark — improve the lighting', 'bad');
+                if (mean > 195) return hintState('⚠️ Too bright — reduce glare / light', 'bad');
+                const eyeW = lastEyeBox.w / video.videoWidth;
+                if (eyeW < 0.22) return hintState('🔍 Move closer — fill the cyan box', 'warn');
+                if (eyeW > 0.65) return hintState('🔍 Too close — move back a bit', 'warn');
+                if (motion > 12) return hintState('📷 Hold steady…', 'warn');
+                return hintState('✅ Eyes aligned — ready to capture', 'ok');
+            }
+
+            // Fallback: basic hints when detector unavailable
+            if (mean < 60) return hintState('⚠️ Too dark — improve the lighting', 'bad');
+            if (mean > 195) return hintState('⚠️ Too bright — reduce glare / light', 'bad');
+            if (motion > 12) return hintState('📷 Hold steady…', 'warn');
+            hintState(detectorLoading ? '⏳ Loading eye detector…' : '✅ Good — ready to capture',
+                      detectorLoading ? 'warn' : 'ok');
+        }
+
+        function startHints() {
+            stopHints();
+            prevFrame = null;
+            hintTimer = setInterval(computeHints, 200);
+        }
+
+        function stopHints() {
+            if (hintTimer) {
+                clearInterval(hintTimer);
+                hintTimer = null;
+            }
+            prevFrame = null;
+            lastEyeBox = null;
+            hintBar.className = 'cam-hints';
+        }
+
+        async function startCamera(mode = facing) {
+            stopCamera();
+            facing = mode;
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 960 } },
+                    audio: false
+                });
+                video.srcObject = cameraStream;
+                await video.play();
+                const stage = document.getElementById('camStage');
+                stage.style.aspectRatio = video.videoWidth + ' / ' + video.videoHeight;
+                stage.classList.toggle('mirror', facing === 'user');
+                startHints();
+                initDetector();
+            } catch (err) {
+                showError('Camera error: ' + err.message);
+            }
+        }
+
+        function switchFacing() {
+            startCamera(facing === 'user' ? 'environment' : 'user');
+        }
+
+        function capturePhoto() {
+            if (!cameraStream || video.readyState < 2) {
+                showError('Start the camera first');
+                return;
+            }
+            const vw = video.videoWidth, vh = video.videoHeight;
+            let sx = 0, sy = 0, sw = vw, sh = vh;
+            if (faceDetector) {
+                if (!lastEyeBox) {
+                    showError('No face detected — center your face in the box and try again');
+                    return;
+                }
+                // Crop the detected eye region (+15% margin) from the full-res frame
+                const m = 0.15;
+                sx = Math.max(0, lastEyeBox.x - lastEyeBox.w * m);
+                sy = Math.max(0, lastEyeBox.y - lastEyeBox.h * m);
+                sw = Math.min(vw - sx, lastEyeBox.w * (1 + 2 * m));
+                sh = Math.min(vh - sy, lastEyeBox.h * (1 + 2 * m));
+            }
+            // Upscale crop to ~512px on the long side (model resizes to 192 anyway)
+            cameraCanvas.width = 512;
+            cameraCanvas.height = Math.max(1, Math.round(512 * sh / sw));
+            const cctx = cameraCanvas.getContext('2d');
+            cctx.drawImage(video, sx, sy, sw, sh, 0, 0, cameraCanvas.width, cameraCanvas.height);
+            cameraCanvas.toBlob((blob) => {
+                if (!blob) return;
+                const file = new File([blob], 'eye_capture.jpg', { type: 'image/jpeg' });
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    preview.src = e.target.result;
+                    preview.classList.add('show');
+                    predictFromFile(file);
+                    stopCamera();
+                    switchTab(0);
+                };
+                reader.readAsDataURL(file);
+            }, 'image/jpeg', 0.95);
+        }
+
+        window.addEventListener('pagehide', stopCamera);
+    </script>
+</body>
+</html>
