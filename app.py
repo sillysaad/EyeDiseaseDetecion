@@ -1,8 +1,13 @@
+import pathlib
+import platform
 from pathlib import Path
 
 from flask import Flask, request, render_template, jsonify
 from PIL import Image
 from fastai.vision.all import load_learner
+
+if platform.system() != 'Windows':
+    pathlib.WindowsPath = pathlib.PosixPath
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
